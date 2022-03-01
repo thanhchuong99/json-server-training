@@ -36,14 +36,16 @@ router.render = (req, res) => {
   if (req.method === "GET" && totalCountHeader) {
     const queryParams = queryString.parse(req._parsedUrl.query);
 
-    return res.data.jsonp({
+    const result = {
       data: res.locals.data,
       pagination: {
         _page: Number.parseInt(queryParams._page) || 1,
         _limit: Number.parseInt(queryParams._limit) || 10,
         _totalRows: Number.parseInt(totalCountHeader),
       },
-    });
+    };
+    console.log(result);
+    return res.jsonp(result);
   }
 
   // Otherwise, keep default behavior
