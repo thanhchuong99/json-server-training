@@ -36,7 +36,7 @@ router.render = (req, res) => {
   if (req.method === "GET" && totalCountHeader) {
     const queryParams = queryString.parse(req._parsedUrl.query);
 
-    return res.jsonp({
+    return res.data.jsonp({
       data: res.locals.data,
       pagination: {
         _page: Number.parseInt(queryParams._page) || 1,
