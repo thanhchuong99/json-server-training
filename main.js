@@ -22,79 +22,6 @@ server.get("/echo", (req, res) => {
   res.jsonp(req.query);
 });
 
-//auth
-// expire
-const SECRET_KEY = "72676376";
-
-const expiresIn = "1h";
-
-function createToken(payload) {
-  return jwt.sign(payload, SECRET_KEY, { expiresIn });
-}
-
-function isLoginAuthenticated({ email, password }) {
-  return (
-    userdb.users.findIndex(
-      (user) => user.email === email && user.password === password,
-    ) !== -1
-  );
-}
-
-function isRegisterAuthenticated({ email }) {
-  return userdb.users.findIndex((user) => user.email === email) !== -1;
-}
-
-server.post("/api/auth/register", (req, res) => {
-  const { email, password } = req.body;
-  if (isRegisterAuthenticated({ email })) {
-    const status = 401;
-    const message = "Email already exist";
-    res.status(status).json({ status, message });
-    return;
-  }
-
-  fs.readFile("./users.json", (err, data) => {
-    if (err) {
-      const status = 401;
-      const message = err;
-      res.status(status).json({ status, message });
-      return;
-    }
-    data = JSON.parse(data.toString());
-
-    let last_item_id = data.users[data.users.length - 1].id;
-
-    data.users.push({ id: last_item_id + 1, email: email, password: password });
-    let writeData = fs.writeFile(
-      "./users.json",
-      JSON.stringify(data),
-      (err, result) => {
-        if (err) {
-          const status = 401;
-          const message = err;
-          res.status(status).json({ status, message });
-          return;
-        }
-      },
-    );
-  });
-  const access_token = createToken({ email, password });
-  res.status(200).json({ access_token });
-});
-
-server.post("/api/auth/login", (req, res) => {
-  const { email, password } = req.body;
-
-  if (!isLoginAuthenticated({ email, password })) {
-    const status = 401;
-    const message = "Incorrect Email or Password";
-    res.status(status).json({ status, message });
-    return;
-  }
-  const access_token = createToken({ email, password });
-  res.status(200).json({ access_token });
-});
-//
 server.use((req, res, next) => {
   if (req.method === "POST") {
     req.body.createdAt = Date.now();
@@ -112,6 +39,31 @@ router.render = (req, res) => {
   const headers = res.getHeaders();
 
   const totalCountHeader = headers["x-total-count"];
+  //auth
+  if (
+    req.headers.authorization === undefined ||
+    req.headers.authorization.split(" ")[0] !== "Bearer"
+  ) {
+    const status = 401;
+    const message = "Error in authorization format";
+    res.status(status).json({ status, message, error: true });
+    return;
+  }
+  try {
+    let verifyTokenResult;
+    verifyTokenResult = verifyToken(req.headers.authorization.split(" ")[1]);
+
+    if (verifyTokenResult instanceof Error) {
+      const status = 401;
+      const message = "Access token not provided";
+      return res.status(status).json({ status, message, error: true });
+    }
+  } catch (err) {
+    const status = 401;
+    const message = "Error access_token is revoked";
+    return res.status(status).json({ status, message, error: true });
+  }
+
   if (req.method === "GET" && totalCountHeader) {
     const queryParams = queryString.parse(req._parsedUrl.query);
     const result = {
@@ -128,6 +80,68 @@ router.render = (req, res) => {
   // Otherwise, keep default behavior
   res.jsonp(res.locals.data);
 };
+
+const SECRET_KEY = "luvya";
+
+const EXPIRES_IN = "1h";
+
+// Create a token from a payload
+function createToken(payload) {
+  return jwt.sign(payload, SECRET_KEY, { expiresIn: EXPIRES_IN });
+}
+
+// Verify the token
+function verifyToken(token) {
+  return jwt.verify(token, SECRET_KEY, (err, decode) =>
+    decode !== undefined ? decode : err,
+  );
+}
+// Check if the user exists in database
+function isAuthenticated({ username, password }) {
+  return userdb.users.find(
+    (user) => user.username === username && user.password === password,
+  );
+}
+// Login to one of the users from ./users.json
+server.post("/api/auth/login", (req, res) => {
+  const { username, password } = req.body;
+  if (!isAuthenticated({ username, password })) {
+    const status = 401;
+    const response = {
+      error: true,
+      status,
+      message: "Incorrect username or password",
+    };
+    res.status(status).json(response);
+    return;
+  }
+  const infoUser = isAuthenticated({ username, password });
+  const access_token = createToken(infoUser);
+  res.status(200).json({ access_token });
+});
+
+// Check authen
+server.post("/api/auth/check-auth", (req, res) => {
+  const { access_token } = req.body;
+  const verifyTokenResult = verifyToken(access_token);
+  if (verifyTokenResult instanceof Error) {
+    const status = 401;
+    const response = {
+      error: true,
+      status,
+      message: "Incorrect acces token",
+    };
+    res.status(status).json(response);
+    return;
+  }
+  res.status(200).json({
+    error: false,
+    status: 200,
+    message: "Authen success",
+    data: verifyTokenResult,
+  });
+});
+
 // Use default router
 server.use("/api", router);
 const PORT = process.env.PORT || 3000;
