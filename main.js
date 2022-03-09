@@ -164,10 +164,10 @@ server.post("/api/auth/check-auth", (req, res) => {
   });
 });
 server.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', 'http://localhost:3000')
-  res.header('Access-Control-Allow-Headers', '*')
-  next()
-})
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Headers", "*");
+  next();
+});
 // Use default router
 server.use("/api", router);
 const PORT = process.env.PORT || 3000;
