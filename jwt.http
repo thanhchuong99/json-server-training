@@ -13,7 +13,7 @@ POST http://localhost:3000/api/auth/refreshToken
 content-type: application/json
 
 {
-    "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6ImJydW5vIiwidXNlcm5hbWUiOiJ0ZXN0MUBlbWFpbC5jb20iLCJwYXNzd29yZCI6InRlc3QxMjMiLCJpYXQiOjE2NDY3MzIyODV9.nKXNVD_pS2KRQAAb8CcE5tS5x-yXE6i6FaxfQaD_QYw"
+    "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6ImJydW5vIiwidXNlcm5hbWUiOiJ0ZXN0MUBlbWFpbC5jb20iLCJwYXNzd29yZCI6InRlc3QxMjMiLCJpYXQiOjE2NDY3OTY2MzR9.UBZ15_nBP95aSiK01vFUb2jvn_deFSuOMF_MRb8EbV4"
 }
 ######
 POST http://localhost:3000/api/auth/check-auth
@@ -28,4 +28,11 @@ content-type: application/json
 
 {
     "token":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6ImJydW5vIiwidXNlcm5hbWUiOiJ0ZXN0MUBlbWFpbC5jb20iLCJwYXNzd29yZCI6InRlc3QxMjMiLCJpYXQiOjE2NDY3MzI2MTJ9.LaTCmxw4Ez1A3Cxy7u0u9FU41XvxRNxz1N88lizjHug"
+}
+######
+POST http://localhost:3000/api/auth/check-auth
+content-type: application/json
+
+{
+  "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6MSwibmFtZSI6ImJydW5vIiwidXNlcm5hbWUiOiJ0ZXN0MUBlbWFpbC5jb20iLCJwYXNzd29yZCI6InRlc3QxMjMiLCJpYXQiOjE2NDY3OTYyMDMsImV4cCI6MTY0Njc5NjIzM30.b8ttPRYTfzY7uEv5nhPr3FI8KItDEsNdmlxGGcaiUIA"
 }

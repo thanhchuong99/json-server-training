@@ -105,6 +105,7 @@ function createToken(payload) {
 // Verify the token
 function verifyToken(token) {
   return jwt.verify(token, SECRET_KEY, (err, decode) => {
+    console.log(decode);
     return decode !== undefined ? decode : err;
   });
 }
@@ -143,6 +144,7 @@ server.post("/api/auth/logout", (req, res) => {
 // Check authen
 server.post("/api/auth/check-auth", (req, res) => {
   const { access_token } = req.body;
+  console.log(access_token);
   const verifyTokenResult = verifyToken(access_token);
   if (verifyTokenResult instanceof Error) {
     const status = 401;
