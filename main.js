@@ -12,8 +12,21 @@ server.use(bodyParser.json());
 server.use(jsonServer.bodyParser);
 const router = jsonServer.router("db.json");
 const middlewares = jsonServer.defaults();
-const userdb = JSON.parse(fs.readFileSync("users.json", "UTF-8"));
-
+const userdb = JSON.parse(fs.readFileSync("./users.json", "UTF-8"));
+const refreshTokens = [];
+server.post("/api/auth/refreshToken", (req, res) => {
+  const refreshToken = req.body.token;
+  console.log(refreshTokens);
+  if (!refreshToken) res.sendStatus(401);
+  if (!refreshTokens.includes(refreshToken)) res.sendStatus(403);
+  jwt.verify(refreshToken, REFRESH_KEY, (err, data) => {
+    if (err) res.sendStatus(403);
+    const access_token = jwt.sign({ username: data.username }, SECRET_KEY, {
+      expiresIn: EXPIRES_IN,
+    });
+    res.json({ access_token });
+  });
+});
 // Set default middlewares (logger, static, cors and no-cache)
 server.use(middlewares);
 
@@ -52,7 +65,6 @@ router.render = (req, res) => {
   try {
     let verifyTokenResult;
     verifyTokenResult = verifyToken(req.headers.authorization.split(" ")[1]);
-
     if (verifyTokenResult instanceof Error) {
       const status = 401;
       const message = "Access token not provided";
@@ -81,9 +93,9 @@ router.render = (req, res) => {
   res.jsonp(res.locals.data);
 };
 
-const SECRET_KEY = "luvya";
-
-const EXPIRES_IN = "1h";
+const SECRET_KEY = "jwtabc";
+const REFRESH_KEY = "jwtabcrefresh";
+const EXPIRES_IN = "30s";
 
 // Create a token from a payload
 function createToken(payload) {
@@ -92,9 +104,9 @@ function createToken(payload) {
 
 // Verify the token
 function verifyToken(token) {
-  return jwt.verify(token, SECRET_KEY, (err, decode) =>
-    decode !== undefined ? decode : err,
-  );
+  return jwt.verify(token, SECRET_KEY, (err, decode) => {
+    return decode !== undefined ? decode : err;
+  });
 }
 // Check if the user exists in database
 function isAuthenticated({ username, password }) {
@@ -117,7 +129,15 @@ server.post("/api/auth/login", (req, res) => {
   }
   const infoUser = isAuthenticated({ username, password });
   const access_token = createToken(infoUser);
-  res.status(200).json({ access_token });
+  const refreshToken = jwt.sign(infoUser, REFRESH_KEY);
+  refreshTokens.push(refreshToken);
+  res.status(200).json({ access_token, refreshToken });
+});
+//logout
+server.post("/api/auth/logout", (req, res) => {
+  const refreshToken = req.body.token;
+  refreshTokens = refreshTokens.filter((refToken) => refToken !== refreshToken);
+  res.sendStatus(200);
 });
 
 // Check authen
