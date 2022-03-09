@@ -13,7 +13,7 @@ server.use(jsonServer.bodyParser);
 const router = jsonServer.router("db.json");
 const middlewares = jsonServer.defaults();
 const userdb = JSON.parse(fs.readFileSync("./users.json", "UTF-8"));
-const refreshTokens = [];
+let refreshTokens = [];
 server.post("/api/auth/refreshToken", (req, res) => {
   const refreshToken = req.body.token;
   console.log(refreshTokens);
