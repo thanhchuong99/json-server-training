@@ -95,7 +95,7 @@ router.render = (req, res) => {
 
 const SECRET_KEY = "jwtabc";
 const REFRESH_KEY = "jwtabcrefresh";
-const EXPIRES_IN = "30s";
+const EXPIRES_IN = "1h";
 
 // Create a token from a payload
 function createToken(payload) {
