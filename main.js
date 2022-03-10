@@ -3,8 +3,10 @@ const queryString = require("query-string");
 const fs = require("fs");
 const bodyParser = require("body-parser");
 const jwt = require("jsonwebtoken");
-
+const cors = require("cors");
 const server = jsonServer.create();
+server.use(cors());
+
 server.use(bodyParser.urlencoded({ extended: true }));
 // To handle POST, PUT and PATCH you need to use a body-parser
 // You can use the one used by JSON Server
